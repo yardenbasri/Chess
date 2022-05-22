@@ -6,11 +6,16 @@ Pown::Pown(sf::Texture& pieceTex, sf::Vector2f position, int isWhite, sf::Vector
 {
 	this->position = position;
 	this->piece.setTexture(pieceTex);
+	//this->piece.setScale(0.78125f, 0.78125f);
 	//this->piece.setScale(1.2f, 1.2f);
 	this->piece.setPosition(position.x, position.y);
 	this->isWhite = isWhite;
-	this->indexes = indexes;
+	this->indexes = this->first_indexes = indexes;
 	this->type = type;
+	if (isWhite)
+		this->first_indexes.x = 6;
+	else
+		this->first_indexes.x = 1;
 	this->pieceMoved = 0;
 
 }
@@ -54,7 +59,7 @@ int Pown::IsPossibleMove(sf::Vector2i dest, Piece* pieces[DIMENSIONS][DIMENSIONS
 			else
 			{
 				// check for potential en passent:
-				return IsEnPassent(dest);
+				return IsEnPassent(dest, pieces);
 			}
 		}
 	}
@@ -83,59 +88,100 @@ int Pown::IsPossibleMove(sf::Vector2i dest, Piece* pieces[DIMENSIONS][DIMENSIONS
 	return 0;
 }
 
-
 std::vector<sf::Vector2i> Pown::GetPossibleMoves(Piece* pieces[DIMENSIONS][DIMENSIONS])
 {
-	std::vector<sf::Vector2i> moves;
+	std::vector<sf::Vector2i> possibleMoves;
+	if (!pieceMoved && this->indexes != this->first_indexes)
+		pieceMoved = 1;
+	/*if(!pieceMoved)
+		if(isWhite)
+			if (this->indexes.x != 6)
+				pieceMoved = 1;
+			else
+				if (this->indexes.x != 1)
+					pieceMoved = 1;*/
 
-	sf::Vector2i possibleMoves[4];
+	int yDir = 1, xDir;
 	if (isWhite)
-	{
-		possibleMoves[0] = { this->indexes.x - 1, this->indexes.y + 1 };
-		possibleMoves[1] = { this->indexes.x - 1, this->indexes.y - 1 };
-		possibleMoves[2] = { this->indexes.x - 1, this->indexes.y };
-		possibleMoves[3] = { this->indexes.x - 2, this->indexes.y };
-	}
+		xDir = -1;
 	else
+		xDir = 1;
+	sf::Vector2i temp = this->indexes;
+	temp.x += xDir;
+	if (InBoard(temp) && !pieces[temp.x][temp.y])
+		possibleMoves.push_back(temp);
+	temp.x += xDir;
+	if (InBoard(temp) && !pieceMoved && !pieces[temp.x][temp.y] && !pieces[temp.x - xDir][temp.y])
+		possibleMoves.push_back(temp);
+	temp = this->indexes;
+	for (int i = 0; i < 2; i++)
 	{
-		possibleMoves[0] = { this->indexes.x + 1, this->indexes.y + 1 };
-		possibleMoves[1] = { this->indexes.x + 1, this->indexes.y - 1 };
-		possibleMoves[2] = { this->indexes.x + 1, this->indexes.y };
-		possibleMoves[3] = { this->indexes.x + 2, this->indexes.y };
-
+		temp.y += yDir;
+		temp.x += xDir;
+		if (InBoard(temp) && OppositeColors(temp, pieces))
+			if (pieces[temp.x][temp.y] || IsEnPassent(temp, pieces))
+				possibleMoves.push_back(temp);
+		yDir *= -1;
+		temp = this->indexes;
 	}
-	for (auto move : possibleMoves) {
-		if (pieces[indexes.x][indexes.y]->IsPossibleMove(move, pieces))
-		{
-			moves.push_back(move);
-		}
-	}
-
-	return moves;
+	return possibleMoves;
 }
 
-int Pown::IsEnPassent(sf::Vector2i dest)
-{
-	printf("(%d, %d) -> (%d, %d)\n", lastMove[0].x, lastMove[0].y, lastMove[1].x, lastMove[1].y);
-	if (isWhite)
-	{
-		if (this->indexes.x != 3)
-			return 0;
-		if (lastMove[0] == sf::Vector2i(dest.x - 1, dest.y) && lastMove[1] == sf::Vector2i(dest.x+1, dest.y))
-		{
-			return 1;
-		}
-	}
-	else
-	{
-		if (this->indexes.x != 4)
-			return 0;
-		if (lastMove[0] == sf::Vector2i(dest.x + 1, dest.y) && lastMove[1] == sf::Vector2i(dest.x - 1, dest.y))
-		{
-			return 1;
-		}
-	}
-	return 0;
-}
+
+
+//std::vector<sf::Vector2i> Pown::GetPossibleMoves(Piece* pieces[DIMENSIONS][DIMENSIONS])
+//{
+//	std::vector<sf::Vector2i> moves;
+//
+//	sf::Vector2i possibleMoves[4];
+//	if (isWhite)
+//	{
+//		possibleMoves[0] = { this->indexes.x - 1, this->indexes.y + 1 };
+//		possibleMoves[1] = { this->indexes.x - 1, this->indexes.y - 1 };
+//		possibleMoves[2] = { this->indexes.x - 1, this->indexes.y };
+//		possibleMoves[3] = { this->indexes.x - 2, this->indexes.y };
+//	}
+//	else
+//	{
+//		possibleMoves[0] = { this->indexes.x + 1, this->indexes.y + 1 };
+//		possibleMoves[1] = { this->indexes.x + 1, this->indexes.y - 1 };
+//		possibleMoves[2] = { this->indexes.x + 1, this->indexes.y };
+//		possibleMoves[3] = { this->indexes.x + 2, this->indexes.y };
+//
+//	}
+//
+//	for (auto move : possibleMoves) {
+//		if (pieces[indexes.x][indexes.y]->IsPossibleMove(move, pieces))
+//		{
+//			moves.push_back(move);
+//		}
+//	}
+//
+//	return moves;
+//}
+
+//int Pown::IsEnPassent(sf::Vector2i dest, Piece* pieces[DIMENSIONS][DIMENSIONS])
+//{
+//	
+//	if (isWhite)
+//	{
+//		if (this->indexes.x != 3)
+//			return 0;
+//		if (lastMove[0] == sf::Vector2i(dest.x - 1, dest.y) && lastMove[1] == sf::Vector2i(dest.x+1, dest.y) && pieces[dest.x+1][dest.y]->GetType() == "bp")
+//		{
+//			return 1;
+//		}
+//	}
+//	else
+//	{
+//		if (this->indexes.x != 4)
+//			return 0;
+//		if (lastMove[0] == sf::Vector2i(dest.x + 1, dest.y) && lastMove[1] == sf::Vector2i(dest.x - 1, dest.y) && pieces[dest.x - 1][dest.y]->GetType() == "wp")
+//		{
+//			return 1;
+//		}
+//	}
+//	return 0;
+//}
 
 

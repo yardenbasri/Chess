@@ -1,8 +1,10 @@
-#include <SFML/Graphics.hpp>
-#include "Game.h"
-#include "OfflineGame.h"
+#include "Menu.h"
+
+
 int main()
 {
-	Game* game = new OfflineGame();
-	game->Start();
+	Menu menu;
+	menu.Start();
+	return 0;
 }
+

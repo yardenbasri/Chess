@@ -5,6 +5,7 @@ Queen::Queen(sf::Texture& pieceTex, sf::Vector2f position, int isWhite, sf::Vect
 {
 	this->position = position;
 	this->piece.setTexture(pieceTex);
+	//this->piece.setScale(0.75f, 0.75f);
 	//this->piece.setScale(1.2f, 1.2f);
 	this->piece.setPosition(position.x, position.y);
 	this->isWhite = isWhite;
@@ -123,6 +124,20 @@ int Queen::IsPossibleMove(sf::Vector2i dest, Piece* pieces[DIMENSIONS][DIMENSION
 		}
 	}
 	return 0;
+}
+
+std::vector<sf::Vector2i> Queen::GetPossibleMoves(Piece* pieces[DIMENSIONS][DIMENSIONS])
+{
+	std::vector<sf::Vector2i> possibleMoves;
+	UpdatePossibleMoves(&possibleMoves, 1, 0, pieces, DIMENSIONS);
+	UpdatePossibleMoves(&possibleMoves, -1, 0, pieces, DIMENSIONS);
+	UpdatePossibleMoves(&possibleMoves, 0, 1, pieces, DIMENSIONS);
+	UpdatePossibleMoves(&possibleMoves, 0, -1, pieces, DIMENSIONS);
+	UpdatePossibleMoves(&possibleMoves, 1, 1, pieces, DIMENSIONS);
+	UpdatePossibleMoves(&possibleMoves, 1, -1, pieces, DIMENSIONS);
+	UpdatePossibleMoves(&possibleMoves, -1, 1, pieces, DIMENSIONS);
+	UpdatePossibleMoves(&possibleMoves, -1, -1, pieces, DIMENSIONS);
+	return possibleMoves;
 }
 
 

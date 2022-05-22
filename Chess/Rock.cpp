@@ -7,11 +7,11 @@ Rock::Rock(sf::Texture& pieceTex, sf::Vector2f position, int isWhite, sf::Vector
 {
 	this->position = position;
 	this->piece.setTexture(pieceTex);
+	//this->piece.setScale(0.78125f, 0.78125f);
 	//this->piece.setScale(1.2f, 1.2f);
 	this->piece.setPosition(position.x, position.y);
 	this->isWhite = isWhite;
-	this->indexes = indexes;
-	this->first_indexes = indexes;
+	this->indexes = this->first_indexes =  indexes;
 	this->type = type;
 	this->pieceMoved = 0;
 }
@@ -86,6 +86,18 @@ int Rock::IsPossibleMove(sf::Vector2i dest, Piece* pieces[DIMENSIONS][DIMENSIONS
 		}
 	}
 	return 0;
+}
+
+std::vector<sf::Vector2i> Rock::GetPossibleMoves(Piece* pieces[DIMENSIONS][DIMENSIONS])
+{
+	if (this->indexes != this->first_indexes)
+		pieceMoved = 1;
+	std::vector<sf::Vector2i> possibleMoves;
+	UpdatePossibleMoves(&possibleMoves, 1, 0, pieces, DIMENSIONS);
+	UpdatePossibleMoves(&possibleMoves, -1, 0, pieces, DIMENSIONS);
+	UpdatePossibleMoves(&possibleMoves, 0, 1, pieces, DIMENSIONS);
+	UpdatePossibleMoves(&possibleMoves, 0, -1, pieces, DIMENSIONS);
+	return possibleMoves;
 }
 
 

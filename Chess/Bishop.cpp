@@ -4,6 +4,7 @@ Bishop::Bishop(sf::Texture& pieceTex, sf::Vector2f position, int isWhite, sf::Ve
 {
 	this->position = position;
 	this->piece.setTexture(pieceTex);
+	//this->piece.setScale(0.78125f, 0.78125f);
 	//this->piece.setScale(1.2f, 1.2f);
 	this->piece.setPosition(position.x, position.y);
 	this->isWhite = isWhite;
@@ -72,6 +73,16 @@ int Bishop::IsPossibleMove(sf::Vector2i dest, Piece* pieces[DIMENSIONS][DIMENSIO
 		}
 	}
 	return 0;
+}
+
+std::vector<sf::Vector2i> Bishop::GetPossibleMoves(Piece* pieces[DIMENSIONS][DIMENSIONS])
+{
+	std::vector<sf::Vector2i> possibleMoves;
+	UpdatePossibleMoves(&possibleMoves, 1, 1, pieces, DIMENSIONS);
+	UpdatePossibleMoves(&possibleMoves, -1, 1, pieces, DIMENSIONS);
+	UpdatePossibleMoves(&possibleMoves, 1, -1, pieces, DIMENSIONS);
+	UpdatePossibleMoves(&possibleMoves, -1, -1, pieces, DIMENSIONS);
+	return possibleMoves;
 }
 
 
